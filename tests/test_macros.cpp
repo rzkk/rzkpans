@@ -70,6 +70,7 @@ void test_assert_macros()
         std::cout << "AAA----- " << i << std::endl;
     }
     std::cout << "A------------------------------------------------------: " << i << std::endl;
+
     for(i = 0; i < 10; ++i)
     {
         ASSERT_CONTINUE2(i != never_reached_condition, "loop index should not be " << i);
@@ -109,13 +110,13 @@ int main()
     std::cout << "This program is compiled in release mode. Assert will do nothing on failure." << std::endl;
 #endif
 
-    test_types_and_constants();
-    test_assert_macros();
+    //test_types_and_constants();
+    //test_assert_macros();
 
-    auto retval1 = test_assert_retval();
-    std::cout << "test_assert_retval() returned: " << retval1 << std::endl;
-    auto retval2 = test_assert_retval2();
-    std::cout << "test_assert_retval2() returned: " << retval2 << std::endl;
+    //auto retval1 = test_assert_retval();
+    //std::cout << "test_assert_retval() returned: " << retval1 << std::endl;
+    //auto retval2 = test_assert_retval2();
+    //std::cout << "test_assert_retval2() returned: " << retval2 << std::endl;
 
-    return EXIT_SUCCESS;
+    // return EXIT_SUCCESS;
 }

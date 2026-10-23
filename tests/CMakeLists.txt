@@ -9,12 +9,10 @@ list(SORT PANS_TEST_SOURCES)
 find_package(Threads REQUIRED)
 
 set( PANS_TEST_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/tests" )  #二进制输出目录
-message(STATUS )
+
 #每个 cpp 文件都是一个单独的测试文件
 foreach(TEST_SOURCE IN LISTS PANS_TEST_SOURCES)
-    message(STATUS "===============================${TEST_SOURCE}")
     get_filename_component(TEST_NAME "${TEST_SOURCE}" NAME_WE)
-    message(STATUS "-------------------------------${TEST_NAME}")
     
     if(TARGET "${TEST_NAME}")
         message(FATAL_ERROR "Cannot create test target '${TEST_NAME}': a target with that name already exists")

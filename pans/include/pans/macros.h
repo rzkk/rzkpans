@@ -5,80 +5,89 @@
 #include<iostream>
 #include<cstdint>
 
+// 对外提供的接口 ： x 为false  : 进入断言
+
+
  // unlikely : c++20 , 告诉编译器这个条件极大概率不成立
-#define PANS_ASSERT(x) \ 
-    if(!(x))  [ [unlikely] ] {\  
-        std::cerr<< __FILE__ << " : "<< __LINE__  <<"ASSERT FAILED : " << #x <<"\nStacktrace : to do \n " ;\
+ // x : fasle 不正常的
+#define PANS_ASSERT(x) \
+    if(!(x))  [ [unlikely] ] {\
+        std::cerr<< __FILE__ << ":"<< __LINE__  <<"  ASSERT FAILED : " << #x <<"\nStacktrace : to do \n " ;\
         assert(x); \
     } 
 
 //增加 info 参数
-#define PANS_ASSERT2(x , w) \ 
-    if(!(x))  [ [unlikely] ] { \ 
-        std::cerr<< __FILE__ << " : "<< __LINE__ << "ASSERT " << #x <<" failed . [ " << w  <<"]. \nStacktrace : to do \n " ;\
+#define PANS_ASSERT2(x , w) \
+    if(!(x))  [ [unlikely] ] { \
+        std::cerr<< __FILE__ << ":"<< __LINE__ << "  ASSERT " << #x <<" failed . [ " << w  <<"]. \nStacktrace : to do \n " ;\
         assert(x); \
     } 
 
 // 函数中的 assert 
-#define ASSERT_RETVAL(x , val) \ 
-    do{ \ 
+//x 为true : 正常的
+//x fasle : 不正常
+#define ASSERT_RETVAL(x , val) \
+    do{ \
         if(x) [[likely]] break; \
         PANS_ASSERT(x); \
         return val;\
     }while(0)
 
-#define ASSERT_RETVAL2(x , val , info) \ 
-    do{ \ 
+#define ASSERT_RETVAL2(x , val , info) \
+    do{ \
         if(x) [[likely]] break; \
         PANS_ASSERT2(x,info); \
         return val;\
     }while(0)
 
-#define ASSERT_RETNONE(x ) \ 
-    do{ \ 
+#define ASSERT_RETNONE(x ) \
+    do{ \
         if(x) [[likely]] break; \
         PANS_ASSERT(x); \
         return ; \
     }while(0)
 
-#define ASSERT_RETNONE2(x , info) \ 
-    do{ \ 
+#define ASSERT_RETNONE2(x , info) \
+    do{ \
         if(x) [[likely]] break; \
         PANS_ASSERT2(x ,info); \
         return ;\
     }while(0)
 
 // assert 之后不return
-#define ASSERT_NOEFFECT(x)\ 
-    do{ \ 
+// release 时只是将堆栈打出 ， 不会中断
+#define ASSERT_NOEFFECT(x)\
+    do{ \
         if(x) [[likely]] break; \
         PANS_ASSERT(x); \
     }while(0)
 
-#define ASSERT_NOEFFECT2(x , info) \ 
-    do{ \ 
+#define ASSERT_NOEFFECT2(x , info) \
+    do{ \
         if(x) [[likely]] break; \
         PANS_ASSERT2(x ,info); \
     }while(0)
 
 // 循环中的 assert 
+//x true : 正常
+// 
 #define ASSERT_CONTINUE(x) \
-    if(!(x))  [ [unlikely] ] {\  
+    if(!(x))  [ [unlikely] ] {\
         PANS_ASSERT(x); \
         continue; \
     } else {}
 #define ASSERT_CONTINUE2(x , info) \
-    if(!(x))  [ [unlikely] ] {\  
+    if(!(x))  [ [unlikely] ] {\
         PANS_ASSERT2(x , info); \
         continue; \
     } else {}
 #define ASSERT_BREAK(x) \
-    if(!(x))  [ [unlikely] ] {\  
+    if(!(x))  [ [unlikely] ] {\
         PANS_ASSERT(x); \
-        continue; \
+        break; \
     } else {}
 #define ASSERT_BREAK2(x , info) \
-    if(!(x))  [ [unlikely] ] {\  
+    if(!(x))  [ [unlikely] ] {\
         PANS_ASSERT2(x , info); \
         break; \
     } else {}  

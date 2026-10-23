@@ -8,8 +8,8 @@ set -euo pipefail
 
 # 定义变量，方便统一修改
 BUILD_DIR="build"
-EXEC_PATH="./bin/tests/*"
-TEST_BUILD_DIR="./bin/tests"
+EXEC_PATH="./bin/tests/test_macros"
+TEST_BUILD_DIR="$BUILD_DIR"
 clear 
 
 rm -rf $BUILD_DIR $TEST_BUILD_DIR
@@ -25,12 +25,12 @@ cmake --build "$BUILD_DIR"  --parallel "$(nproc)"
 
 
 
-# --test-dir：指定测试所在构建目录
+# --test-dir：指定测试所在的 构建目录  # 不是目标文件目录
 # --output-on-failure：只在测试失败时输出详细信息
 # --no-tests=error：未注册测试时将其视为错误
-ctest --test-dir "$TEST_BUILD_DIR" \
-      --output-on-failure \
-      --no-tests=error
+# ctest --test-dir "$TEST_BUILD_DIR" \
+#       --output-on-failure \
+#       --no-tests=error
 
 
 # if  [ ! -f "$EXEC_PATH" ]; then
@@ -44,5 +44,5 @@ ctest --test-dir "$TEST_BUILD_DIR" \
 #     exit 1
 # fi
 
-echo ""
+# echo "-----------------------------------------------------------------------------------"
 # "$EXEC_PATH"

@@ -33,6 +33,3 @@ install(TARGETS pans
 install(FILES ${PANS_HEADERS} 
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pans
 )
-
-message(STATUS "--------37 ${CMAKE_INSTALL_INCLUDEDIR}")
-

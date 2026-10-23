@@ -20,7 +20,6 @@ project(pans VERSION 0.1.0  LANGUAGES CXX C)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-message(STATUS "CMAKE_INSTALL_BINDIR : ${CMAKE_INSTALL_BINDIR}")
 
 
 option(PANS_BUILD_EXAMPLES "Build examples" ON)
@@ -42,7 +41,6 @@ add_subdirectory(pans) # 添加子目录
 if(PANS_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
-    message(STATUS "------------------------")
 endif()
 
 if(PANS_BUILD_TOOLS)
