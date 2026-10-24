@@ -1,6 +1,8 @@
 file(GLOB_RECURSE PANS_SOURCES CONFIGURE_DEPENDS *.cpp *.cc *.c)
 file(GLOB_RECURSE PANS_HEADERS CONFIGURE_DEPENDS *.h *.hpp)
 
+message(STATUS "===========================${PANS_SOURCES}")
+message(STATUS "$---------------------${PANS_HEADERS}")
 
 add_library(pans STATIC ${PANS_SOURCES} ${PANS_HEADERS})  # 生成 libpans.a
 

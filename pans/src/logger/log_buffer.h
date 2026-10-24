@@ -50,14 +50,14 @@ public:
         return m_size;
     }
 
-    [[nodiscard]] std::string_view view() const noexcept  // string_view : 就是一个二元组
+    [[nodiscard]] std::string_view view() const noexcept  // string_view : 就是一个二元组 //std::string_view 只是借用日志数据。
     {
-        return {data() , size()}
+        return {data() , size()};
     }
 private:
-    std::array<char , INLINE_CAPACITY> m_inline{}; //短日志 int m_inline[256]; 
+    std::array<char , INLINE_CAPACITY> m_inline{}; //短日志  m_inline{} 中的 {} 会初始化全部字符为零
     std::vector<char>m_overflow;             // 长日志 存在堆上 
-    std::size_t m_size = 0 ; // 日志长度
+    std::size_t m_size = 0 ; // 日志长度 
 };
 
 // 继承std::streambuf是为了能够能够继续使用流式输入接口，兼容ostream生态
@@ -70,20 +70,26 @@ public:
 
 //子类重写
 protected:
+    // << 会调用 xsputn 
     std::streamsize xsputn(const char * data , std::streamsize size) override{
-        if(size <= 0) return 0; // 非法
+        // size < 0 非法 
+        // size ==0 , 没有字符串输入
+        if(size <= 0) return 0; 
         m_buffer.append(data , static_cast<std::size_t>(size));
-        return size;
+        return size;//返回 本次 xsputn() 成功写入了多少字符。
     }
     // 为了单字符输出 // 如果不重写这个接口 有可能造成流错误
-    // bug 出在 sputc
-    // overflow，除了可以接受一般字符，还可能会接收流终止符EOF
-    // 如果我们遇到了EOF, 把它转成非EOF值向上报告写入成功，实际上不向Buffer里写入任何值。
-    int_type overflow(int_type character) override{
-        if(traits_type::eq_int_type(character , traits_type::eof())){
-            return traits_type::not_eof(character);
-        }
+    //通常 using char_type = char;using int_type = int;  char只有8位 ，表示字符 ，但还需额外表示 “没有字符”或“写入失败”
+    //    traits_type::eof() ： -1  ， but 不同编译器 eof 值不同
+    // eof()	获取 EOF 特殊值   ，  eq_int_type(a, b)	比较两个 int_type 值
+    //not_eof(c)	返回一个不是 EOF 的值，  to_char_type(c)	把 int_type 转为字符类型
 
+    int_type overflow(int_type character) override{
+        ////如果这次收到的是 EOF 特殊值，就不要把它当作实际字符追加到缓冲区，而是返回非 EOF 的结果，表示本次操作成功。
+        if(traits_type::eq_int_type(character , traits_type::eof())){
+            return traits_type::not_eof(character); // 它保证返回一个不等于 EOF 的值。
+        }
+        //通过 traits_type::to_char_type() 转换，比直接写一个不加解释的整数转字符更符合标准流的类型设计。
         m_buffer.append(traits_type::to_char_type(character));
         return character;
     }
@@ -92,10 +98,26 @@ private:
     InlineBuffer<INLINE_CAPACITY>& m_buffer;
 };
 
+
+void func(){
+    InlineBuffer<128> buffer;
+    SmallStreamBuffer<128> streambuf(buffer);
+
+    std::ostream os(&streambuf);
+    std::cout<<"hello";
+    os << "age=" << 20;
+}
+
     
 } // namespace pans::detail
 
 
+/* 
+*
+*
+*
+*
+*/
 
 
 
