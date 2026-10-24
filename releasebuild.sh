@@ -12,7 +12,7 @@ EXEC_PATH="./bin/tests/test_macros"
 TEST_BUILD_DIR="$BUILD_DIR"
 clear 
 
-rm -rf $BUILD_DIR $TEST_BUILD_DIR
+rm -rf $BUILD_DIR $TEST_BUILD_DIR 
 
 
 # -S .   指定源码目录

@@ -55,6 +55,12 @@ private:
     std::atomic_flag m_mutex = ATOMIC_FLAG_INIT;
 };
 
+// ====================== 方案 2：atomic_wait 等待式锁 ======================
+// C++20 提供 atomic_wait / atomic_notify_one。
+// 它与上面的“纯自旋”不同：等待时可能让当前线程进入阻塞状态，
+// 从而节约 CPU，但阻塞/唤醒有额外开销。
+// 注意：具体是否用操作系统等待原语属于标准库的实现细节。
+// 当前 main() 中这一项被注释，没有参加本次实际对比。
 class AtomicWaitLock
 {
 public:
@@ -67,11 +73,35 @@ public:
     AtomicWaitLock& operator=(const AtomicWaitLock&) = delete;
 
     void lock() noexcept
-    {
+    {   // false=空闲，true=被占用。
+        // CAS 操作需要一个可修改的 expected 变量，作为“期望的旧值”。
         bool expected = false;
-        while (!m_mutex.compare_exchange_weak(expected, true, std::memory_order_acquire, std::memory_order_relaxed))
+        // compare_exchange_weak(expected, true, success_order, failure_order)：
+        // 若当前状态==expected(false)，就把状态原子地改成 true，取得锁； 返回true , 不进入循环
+        // 否则失败，将实际状态写回 expected。
+        // weak 允许伪失败，因此必须放在循环里重试。
+        while (!m_mutex.compare_exchange_weak(   // 尝试获取锁
+                    expected, true, 
+                    std::memory_order_acquire,  // 成功拿锁后获得临界区同步保障。
+                    std::memory_order_relaxed)) // 未拿到锁时不需要同步其他业务数据。
         {
-            std::atomic_wait_explicit(&m_mutex, true, std::memory_order_relaxed);
+            // 等待 m_mutex 不再等于 true。
+            // 这不是普通 bool 的条件等待，而是对原子对象的等待。
+            // 可能被虚假唤醒，或醒来后锁已被其他线程抢走，
+            // 所以外层 while 一定要重新尝试 CAS。
+            //函数： 当一个原子变量的值等于指定的旧值（old）时，让当前线程等待；
+            //收到通知后重新检查，直到该值不再等于 old 才返回。
+            //void std::atomic_wait_explicit(
+                    // const std::atomic<T>* object,
+                    // typename std::atomic<T>::value_type old,
+                    // std::memory_order order）
+            std::atomic_wait_explicit(&m_mutex, 
+                true,                   //只要锁仍然是 true（被占用），就继续等待它变化。
+                std::memory_order_relaxed);
+            
+            // CAS 失败时 expected 通常被写成“实际值 true”。
+            // 下一次争抢必须重新把期望状态设为 false，
+            // 否则可能错误地尝试把 true->true 并当作已获取锁。
             expected = false;
         }
     }
@@ -84,6 +114,8 @@ public:
 
     void unlock() noexcept
     {
+         // 先 release 发布被保护的数据，再唤醒一个等待中的线程。
+        // 若只 notify 而没有 store(false)，等待者醒来仍然拿不到锁。
         m_mutex.store(false, std::memory_order_release);
         std::atomic_notify_one(&m_mutex);
     }
@@ -184,13 +216,13 @@ int main(int argc, char** argv)
     std::cout << std::fixed << std::setprecision(2);
     std::cout << "operations: " << g_target << ", average of " << RUNS << " runs\n\n";
 
-    const std::vector<std::size_t> thread_counts = {1, 2, 4, 8, 10};
+    const std::vector<std::size_t> thread_counts = {1, 2, 3, 4, 5,6,7,8,10,16,20};
     for (const std::size_t thread_count : thread_counts)
     {
         std::cout << "threads: " << thread_count << '\n';
         PrintResult("pthread_spinlock::Spinlock", Run([&]() { return BenchmarkMutex<pans::Spinlock>(thread_count); }));
         PrintResult("atomic_flag::Spinlock", Run([&]() { return BenchmarkMutex<Spinlock>(thread_count); }));
-        // PrintResult("atomic_wait", Run([&]() { return BenchmarkMutex<AtomicWaitLock>(thread_count); }));
+         PrintResult("atomic_wait", Run([&]() { return BenchmarkMutex<AtomicWaitLock>(thread_count); }));
         PrintResult("std::mutex", Run([&]() { return BenchmarkMutex<std::mutex>(thread_count); }));
         std::cout << '\n';
     }
@@ -204,7 +236,7 @@ int main(int argc, char** argv)
 实测数据如下(平台6核 x86_64 Debian机器)：
 
 dev@debian:~/Code/second/pans/bin/tests$ ./test_mutex 1000000
-operations: 1000000, average of 7 runs
+operations: 1000000, average of 7 runs 
 
 threads: 1
 pthread_spinlock::Spinlock    14335512.29 ns    total, 14.34 ns/op
