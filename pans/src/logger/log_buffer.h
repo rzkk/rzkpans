@@ -98,17 +98,6 @@ private:
     InlineBuffer<INLINE_CAPACITY>& m_buffer;
 };
 
-
-void func(){
-    InlineBuffer<128> buffer;
-    SmallStreamBuffer<128> streambuf(buffer);
-
-    std::ostream os(&streambuf);
-    std::cout<<"hello";
-    os << "age=" << 20;
-}
-
-    
 } // namespace pans::detail
 
 

@@ -8,12 +8,12 @@ set -euo pipefail
 
 # 定义变量，方便统一修改
 BUILD_DIR="build"
-EXEC_PATH="./bin/tests/test_macros"
+EXEC_PATH="./bin/tests"
 TEST_BUILD_DIR="$BUILD_DIR"
 clear 
 
-rm -rf $BUILD_DIR $TEST_BUILD_DIR
-
+rm -rf $BUILD_DIR $TEST_BUILD_DIR   $EXEC_PATH
+mkdir  $EXEC_PATH
 
 # -S .   指定源码目录
 # -B     指定构建目录

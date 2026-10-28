@@ -36,7 +36,7 @@ std::uint64_t WriteWithSmallStreamBuffer(std::string_view message){
     return Observe(buffer.view());
 }
 
-std::uint64_t WriteWithStringStream(std::string_view message){
+std::uint64_t WriteWithStringStream(std::string_view message){ //todo :  
     std::stringstream stream;
     stream<<message;
     return Observe(stream.view());
@@ -54,7 +54,7 @@ std::chrono::nanoseconds BenchMarkWrites(Operation && operation){  //？  这里
     }
     const auto end = std::chrono::steady_clock::now();
 
-    BENCHMARK_SINK.fetch_xor(checksum, std::memory_order_relaxed);
+    BENCHMARK_SINK.fetch_xor(checksum, std::memory_order_relaxed); // 因为这里不保留一下的话 ， 会把这个变量优化掉
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
 }
 

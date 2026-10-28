@@ -8,7 +8,7 @@ list(SORT PANS_TEST_SOURCES)
 
 find_package(Threads REQUIRED)
 
-set( PANS_TEST_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/tests" )  #二进制输出目录
+set( PANS_TEST_OUTPUT_DIRECTORY  PARENT_SCOPE"${PROJECT_SOURCE_DIR}/bin/tests" )  #二进制输出目录
 
 #每个 cpp 文件都是一个单独的测试文件
 foreach(TEST_SOURCE IN LISTS PANS_TEST_SOURCES)
