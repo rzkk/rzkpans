@@ -1,6 +1,11 @@
 # 接口库  ， 不产生编译产物 ， 只传递编译选项  # 类似于配置包
 add_library(pans_options INTERFACE)
 
+# Debug 模式宏定义
+target_compile_definitions(pans_options INTERFACE
+    $<$<CONFIG:Debug>:PANS_DEBUG>
+)
+
 target_compile_options(pans_options INTERFACE
     # GCC/Clang 通用选项
     $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:
@@ -10,11 +15,12 @@ target_compile_options(pans_options INTERFACE
             -fno-strict-aliasing #禁用“严格别名优化”，防止强转指针类型时被编译器优化出诡异 Bug
     >
 )
-target_compile_options(pans_options INTERFACE
-    $<$<AND:$<PLATFORM_ID:Linux>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:
-            -fPIC       # 编译位置无关代码 # 生成位置无关代码 (Position-Independent Code)，编译动态库(.so)或被动态库链接时必须开启
-    >
-)
+
+# target_compile_options(pans_options INTERFACE
+#     $<$<AND:$<PLATFORM_ID:Linux>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:
+#             -fPIC       # 编译位置无关代码 # 生成位置无关代码 (Position-Independent Code)，编译动态库(.so)或被动态库链接时必须开启
+#     >
+# )
 
 
 target_link_options(pans_options INTERFACE
@@ -24,10 +30,6 @@ target_link_options(pans_options INTERFACE
     >
 )
 
-# Debug 模式宏定义
-target_compile_definitions(pans_options INTERFACE
-    $<$<CONFIG:Debug>:PANS_DEBUG>
-)
 
 # 当构建类型为 Debug 时，追加以下调试编译参数：
 target_compile_options(pans_options INTERFACE

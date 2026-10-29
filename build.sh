@@ -7,13 +7,13 @@
 set -euo pipefail
 
 # 定义变量，方便统一修改
-BUILD_DIR="build"
-EXEC_PATH="./bin/tests"
-TEST_BUILD_DIR="$BUILD_DIR"
+BUILD_DIR="build/debug"
+# EXEC_PATH="./bin/tests"
+# TEST_BUILD_DIR="$BUILD_DIR"
 clear 
 
-rm -rf $BUILD_DIR $TEST_BUILD_DIR   $EXEC_PATH
-mkdir  $EXEC_PATH
+# rm -rf $BUILD_DIR   
+# mkdir  $EXEC_PATH
 
 # -S .   指定源码目录
 # -B     指定构建目录
@@ -21,8 +21,9 @@ cmake -S . -B "$BUILD_DIR"
 
 # --parallel：启用并行编译
 # nproc：获取当前可用的 CPU 逻辑处理器数量
-cmake --build "$BUILD_DIR"  --parallel "$(nproc)"
-
+# CPU_NUM = $(nproc) *1.5
+# cmake --build "$BUILD_DIR"  --parallel "($nproc)"
+cmake --build "$BUILD_DIR"  --parallel 8
 
 
 # --test-dir：指定测试所在的 构建目录  # 不是目标文件目录

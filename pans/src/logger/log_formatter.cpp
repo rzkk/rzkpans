@@ -12,7 +12,7 @@ Formatter::Formatter(std::string_view pattern):m_pattern(pattern) {
     }
 }
 
-void Formatter::format(const LogRecordView& record , FormatterRecordBuffer&output) const {
+void Formatter::format(const LogRecordView& record , FormattedRecordBuffer&output) const {
 // 遍历得到的 m_items，将每一个都追加到 output buffer
     for(const auto & item :m_items){
         item->format(record , output);
@@ -22,7 +22,7 @@ void Formatter::format(const LogRecordView& record , FormatterRecordBuffer&outpu
 
 //std::to_string : 可能在堆上开内存 -> 有可能抛异常
 template<class T>
-void AppendInteger(FormatterRecordBuffer& output , T value) {
+void AppendInteger(FormattedRecordBuffer& output , T value) {
     std::array<char , 24> buffer{}; //栈上的 buffer 
 
     // 基本上不会失败，转失败了也没关系
@@ -36,7 +36,7 @@ class LiteralFormattItem final : public Formatter:: FormatItem{
 public:
     explicit LiteralFormattItem(std::string_view value):m_value(value){  // ???????????? 目前不知道 调用方怎么写
     }  
-    virtual void format(const LogRecordView&  , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView&  , FormattedRecordBuffer & output)const  override{
         output.append(m_value);
     }
 private:
@@ -45,21 +45,21 @@ private:
 
 class MessageFormattItem final : public Formatter:: FormatItem{
 public:
-    virtual void format(const LogRecordView& record , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView& record , FormattedRecordBuffer & output)const  override{
         output.append(record.m_message);
     }
 };
 
 class LevelFormattItem final : public Formatter:: FormatItem{
 public:
-    virtual void format(const LogRecordView& record , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView& record , FormattedRecordBuffer & output)const  override{
         output.append(LogLevel::ToString(record.m_level));
     }
 };
 
 class ElapsedFormattItem final : public Formatter:: FormatItem{
 public:
-    virtual void format(const LogRecordView& record , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView& record , FormattedRecordBuffer & output)const  override{
         //将整数贴进来
         AppendInteger(output , std::chrono::duration_cast<std::chrono::milliseconds>(record.m_elapsed).count());
     }
@@ -67,21 +67,21 @@ public:
 
 class LoggerNameFormattItem final : public Formatter:: FormatItem{
 public:
-    virtual void format(const LogRecordView& record , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView& record , FormattedRecordBuffer & output)const  override{
         output.append(record.m_loggerName);
     }
 };
 
 class ThreadIdFormattItem final : public Formatter:: FormatItem{
 public:
-    virtual void format(const LogRecordView& record , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView& record , FormattedRecordBuffer & output)const  override{
         AppendInteger(output , record.m_threadId);
     }
 };
 
 class NewLineFormattItem final : public Formatter:: FormatItem{  // 换行
 public:
-    virtual void format(const LogRecordView&  , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView&  , FormattedRecordBuffer & output)const  override{
         output.append('\n');
     }
 };
@@ -93,7 +93,7 @@ public:
     explicit DataTimeFormattItem(std::string_view format):m_format(format.empty() ? DEFAULT_DATE_FORMAT : format){  
     }  
 
-    virtual void format(const LogRecordView& record , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView& record , FormattedRecordBuffer & output)const  override{
         static thread_local time_t last_second = 0; // 保证每个线程都有一份
         static thread_local char cached_date_time[20] = {'\0'};
 
@@ -132,7 +132,7 @@ private:
 class MicrosecondsFormattItem final : public Formatter:: FormatItem{
 public:
 
-    virtual void format(const LogRecordView& record , FormatterRecordBuffer & output)const  override{
+    virtual void format(const LogRecordView& record , FormattedRecordBuffer & output)const  override{
         const auto total_microseconds = 
             std::chrono::duration_cast<std::chrono::microseconds>(record.m_timestamp.time_since_epoch()).count();
             std::int64_t microseconds = total_microseconds % 1000000;
@@ -159,7 +159,7 @@ private:
 class FileNameFormatItem final : public Formatter::FormatItem
 {
 public:
-    virtual void format(const LogRecordView& record, FormatterRecordBuffer& output) const override
+    virtual void format(const LogRecordView& record, FormattedRecordBuffer& output) const override
     {
         output.append(record.m_fileName);
     }
@@ -169,7 +169,7 @@ public:
 class LineFormatItem final : public Formatter::FormatItem
 {
 public:
-    virtual void format(const LogRecordView& record, FormatterRecordBuffer& output) const override
+    virtual void format(const LogRecordView& record, FormattedRecordBuffer& output) const override
     {
         AppendInteger(output , record.m_line);
     }
@@ -179,7 +179,7 @@ public:
 class TableFormatItem final : public Formatter::FormatItem
 {
 public:
-    virtual void format(const LogRecordView& , FormatterRecordBuffer& output) const override
+    virtual void format(const LogRecordView& , FormattedRecordBuffer& output) const override
     {
         output.append('\t');
     }
@@ -189,7 +189,7 @@ public:
 class FiberIdFormatItem final : public Formatter::FormatItem
 {
 public:
-    virtual void format(const LogRecordView& record, FormatterRecordBuffer& output) const override
+    virtual void format(const LogRecordView& record, FormattedRecordBuffer& output) const override
     {
         AppendInteger(output , record.m_fiberId);
     }
@@ -199,7 +199,7 @@ public:
 class ThreadNameFormatItem final : public Formatter::FormatItem
 {
 public:
-    virtual void format(const LogRecordView&record , FormatterRecordBuffer& output) const override
+    virtual void format(const LogRecordView&record , FormattedRecordBuffer& output) const override
     {
         output.append(record.m_thredName);
     }

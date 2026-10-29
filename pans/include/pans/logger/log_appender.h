@@ -14,7 +14,7 @@ namespace detail{
 
 //用来代理我们的内部权限，严格控制谁能访问我们的Appender私有实现
 //接口与实现隔离 ， 暴露在外面的 只有接口
-class AppenderAccess;  // 这里只做前置声明 , 
+class AppenderAccess;  // 这里只做前置声明 
 }; // namespace pans::detail
 
 class PANS_API Appender final{
@@ -43,6 +43,7 @@ private:
 
 using AppenderPtr = std::shared_ptr<Appender>;
 
+// ? 这里不是全局函数吗
 PANS_API AppenderPtr MakeStdoutAppender();
 PANS_API AppenderPtr MakeFileAppender(std::string file_name);
 

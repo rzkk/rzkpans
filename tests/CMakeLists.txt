@@ -8,10 +8,14 @@ list(SORT PANS_TEST_SOURCES)
 
 find_package(Threads REQUIRED)
 
-set( PANS_TEST_OUTPUT_DIRECTORY  PARENT_SCOPE"${PROJECT_SOURCE_DIR}/bin/tests" )  #二进制输出目录
 
+# PARENT_SCOPE
+set( PANS_TEST_OUTPUT_DIRECTORY   
+                                "${PROJECT_SOURCE_DIR}/bin/tests" )  #二进制输出目录
+                                  #  "${CMAKE_BINARY_DIR}/bin/tests") # CMAKE_BINARY_DIR 指向整个 CMake 构建树的顶层目录
 #每个 cpp 文件都是一个单独的测试文件
 foreach(TEST_SOURCE IN LISTS PANS_TEST_SOURCES)
+
     get_filename_component(TEST_NAME "${TEST_SOURCE}" NAME_WE)
     
     if(TARGET "${TEST_NAME}")
@@ -20,8 +24,9 @@ foreach(TEST_SOURCE IN LISTS PANS_TEST_SOURCES)
     
     add_executable("${TEST_NAME}"  "${TEST_SOURCE}")
 
-    target_link_libraries("${TEST_NAME}" PRIVATE pans Threads::Threads)
+    target_link_libraries("${TEST_NAME}" PRIVATE pans Threads::Threads dw)
 
+    # 覆盖根目录默认的 bin 输出位置
     set_target_properties("${TEST_NAME}" PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${PANS_TEST_OUTPUT_DIRECTORY}"
     )

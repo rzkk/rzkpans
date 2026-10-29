@@ -7,12 +7,12 @@
 set -euo pipefail
 
 # 定义变量，方便统一修改
-BUILD_DIR="build"
-EXEC_PATH="./bin/tests/test_macros"
-TEST_BUILD_DIR="$BUILD_DIR"
+BUILD_DIR="build/release"
+
+
 clear 
 
-rm -rf $BUILD_DIR $TEST_BUILD_DIR 
+# rm -rf $BUILD_DIR 
 
 
 # -S .   指定源码目录
@@ -25,24 +25,3 @@ cmake --build "$BUILD_DIR"  --parallel "$(nproc)"
 
 
 
-# --test-dir：指定测试所在的 构建目录  # 不是目标文件目录
-# --output-on-failure：只在测试失败时输出详细信息
-# --no-tests=error：未注册测试时将其视为错误
-# ctest --test-dir "$TEST_BUILD_DIR" \
-#       --output-on-failure \
-#       --no-tests=error
-
-
-# if  [ ! -f "$EXEC_PATH" ]; then
-#     echo "❌ 错误: 未找到可执行文件 '$EXEC_PATH'。请检查 CMakeLists.txt 的输出路径设置。"
-#     exit 1
-# fi
-
-# # -x：检查文件是否存在且具备执行权限
-# if [ ! -x "$EXEC_PATH" ]; then
-#     echo "❌ 错误：找不到可执行程序 $EXEC_PATH"
-#     exit 1
-# fi
-
-# echo "-----------------------------------------------------------------------------------"
-# "$EXEC_PATH"

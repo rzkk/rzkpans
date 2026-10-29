@@ -33,8 +33,26 @@ endif()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release RelWithDebInfo MinSizeRel) #设置图形界面的选项
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 
+# ==============================
+# 统一目标输出目录
+# ==============================
+# 静态库：libpans.a
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+    "${CMAKE_BINARY_DIR}/lib"
+)
+# 动态库：libpans.so
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+    "${CMAKE_BINARY_DIR}/lib"
+)
+# 可执行程序：测试程序和工具程序
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+    "${CMAKE_BINARY_DIR}/bin"
+)
 
-include(cmake/pansOptions.cmake)  # 编译参数
+
+
+# include(cmake/pansOptions.cmake)  # 编译参数
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/pansOptions.cmake")
 
 add_subdirectory(pans) # 添加子目录
 
